@@ -33,7 +33,7 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_expenses_recycler,parent, false);
-        RecyclerView.ViewHolder holder = new ViewHolder();
+        //RecyclerView.ViewHolder holder = new ViewHolder();
         return new ViewHolder(view);
     }
     @Override
