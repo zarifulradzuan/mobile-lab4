@@ -40,7 +40,7 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
     public void onBindViewHolder(@NonNull CustomAdapterExpList.ViewHolder holder, int position){
         ExpensesDBModel expensesDBModel = listExpenses.get(position);
         holder.txtVwExpName.setText(expensesDBModel.getStrExpName());
-        holder.txtVwExpPrice.setText(String.format("%2.f",expensesDBModel.getStrExpPrice()));
+        holder.txtVwExpPrice.setText(String.format("%.2f",expensesDBModel.getStrExpPrice()));
         holder.txtVwExpDate.setText(expensesDBModel.getStrExpDate());
     }
 
