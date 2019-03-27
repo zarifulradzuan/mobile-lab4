@@ -22,11 +22,12 @@ public class ExpenseDB extends SQLiteOpenHelper {
     public static final String colExpName = "expenses_name";
     public static final String colExpPrice = "expenses_price";
     public static final String colExpDate = "expenses_date";
+    public static final String colExpTime = "expenses_time";
     public static final String colExpId = "expenses_id";
 
     public static final String strCrtTblExpenses = "CREATE TABLE "+ tblNameExpense +
             " ("+ colExpId + " INTEGER PRIMARY KEY, "+ colExpName +" TEXT, " +
-            colExpPrice + " REAL, " + colExpDate + " DATE)";
+            colExpPrice + " REAL, "+ colExpTime +" TIME, " + colExpDate + " DATE)";
     public static final String strDropTblExpenses = "DROP TABLE IF EXISTS " + tblNameExpense;
 
     public ExpenseDB(Context context){
@@ -50,6 +51,7 @@ public class ExpenseDB extends SQLiteOpenHelper {
         values.put(colExpName, meExpense.getStrExpName());
         values.put(colExpDate, meExpense.getStrExpDate());
         values.put(colExpPrice, meExpense.getStrExpPrice());
+        values.put(colExpTime, meExpense.getStrExpTime());
 
         retResult = db.insert(tblNameExpense, null, values);
         return retResult;
@@ -62,6 +64,7 @@ public class ExpenseDB extends SQLiteOpenHelper {
         values.put(colExpName, meExpense.getStrExpName());
         values.put(colExpDate, meExpense.getStrExpDate());
         values.put(colExpPrice, meExpense.getStrExpPrice());
+        values.put(colExpTime, meExpense.getStrExpTime());
 
         retResult = db.update(tblNameExpense, values, colExpId+" = ?",new String[]{meExpense.getStrExpId()});
         return retResult;
@@ -77,7 +80,8 @@ public class ExpenseDB extends SQLiteOpenHelper {
         return new ExpensesDBModel(
                 cursor.getString(cursor.getColumnIndex(colExpName)),
                 cursor.getDouble(cursor.getColumnIndex(colExpPrice)),
-                cursor.getString(cursor.getColumnIndex(colExpDate)));
+                cursor.getString(cursor.getColumnIndex(colExpDate)),
+                cursor.getString(cursor.getColumnIndex(colExpTime)));
 
     }
 
@@ -87,11 +91,17 @@ public class ExpenseDB extends SQLiteOpenHelper {
         Cursor cursor = this.getReadableDatabase().rawQuery(strSelAll,null);
         if(cursor.moveToFirst()){
             do{
-                ExpensesDBModel model = new ExpensesDBModel(
-                        cursor.getString(cursor.getColumnIndex(colExpName)),
-                        cursor.getDouble(cursor.getColumnIndex(colExpPrice)),
-                        cursor.getString(cursor.getColumnIndex(colExpDate)),
-                        cursor.getString(cursor.getColumnIndex(colExpId)));
+                ExpensesDBModel model;
+                try {
+                    model = new ExpensesDBModel(
+                            cursor.getString(cursor.getColumnIndex(colExpName)),
+                            cursor.getDouble(cursor.getColumnIndex(colExpPrice)),
+                            cursor.getString(cursor.getColumnIndex(colExpDate)),
+                            cursor.getString(cursor.getColumnIndex(colExpTime)),
+                            cursor.getString(cursor.getColumnIndex(colExpId)));
+                } catch (IllegalStateException e){
+                    model = new ExpensesDBModel("No data",0,"No data", "No data", "No data");
+                }
                 list.add(model);
             }while(cursor.moveToNext());
         }

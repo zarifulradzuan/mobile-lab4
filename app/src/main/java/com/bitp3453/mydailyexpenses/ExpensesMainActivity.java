@@ -3,11 +3,26 @@ package com.bitp3453.mydailyexpenses;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import model.ExpensesDBModel;
 import sqliteexpense.ExpenseDB;
@@ -16,25 +31,56 @@ public class ExpensesMainActivity extends AppCompatActivity {
     EditText editExpPrice;
     EditText editExpName;
     EditText editExpDate;
+    EditText editExpTime;
+    String url = "http://192.168.43.72/webServiceJSON/globalWebService.php";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expenses_main);
 
-        editExpName = (EditText) findViewById(R.id.editExpName);
-        editExpDate = (EditText) findViewById(R.id.editExpDate);
-        editExpPrice = (EditText) findViewById(R.id.editExpPrice);
+        editExpName = (EditText) findViewById(R.id.insertExpName);
+        editExpDate = (EditText) findViewById(R.id.insertExpDate);
+        editExpPrice = (EditText) findViewById(R.id.insertExpPrice);
+        editExpTime = (EditText) findViewById(R.id.insertExpTime);
 
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    editExpDate.setText(jsonObject.getString("currDate"));
+                    editExpTime.setText(jsonObject.getString("currTime"));
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),"error reading json", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("ErrorListener",error.getMessage());
+            }
+        })
+        {
+            @Override
+            protected Map<String, String> getParams()throws AuthFailureError {
+                Map<String,String> params = new HashMap<String,String>();
+                params.put("selectFn","fnGetDateTime");
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
     }
 
     public void fnSave (View vw){
         ExpensesDBModel expensesDBModel = new ExpensesDBModel(
                 editExpName.getText().toString(),
                 Double.valueOf(String.format("%.2f",Double.valueOf(editExpPrice.getText().toString()))),
-                editExpDate.getText().toString());
+                editExpDate.getText().toString(),
+                editExpTime.getText().toString());
         ExpenseDB expenseDB = new ExpenseDB(getApplicationContext());
         expenseDB.fnInsertExpense(expensesDBModel);
-        Toast.makeText(getApplicationContext(), "Expenses Saved.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Expenses Saved."+editExpTime.getText().toString(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

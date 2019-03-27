@@ -11,7 +11,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import model.ExpensesDBModel;
-import sqliteexpense.CustomAdapterExpList;
 import sqliteexpense.ExpenseDB;
 
 public class ActivityExpList extends AppCompatActivity {
@@ -24,7 +23,7 @@ public class ActivityExpList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_acitivity_exp_list);
+        setContentView(R.layout.activity_exp_list);
 
         recyclerViewExpList = (RecyclerView) findViewById(R.id.recyListExp);
 
@@ -55,12 +54,15 @@ public class ActivityExpList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        expenseDB.fnEditExpense(new ExpensesDBModel(
-                data.getStringExtra("name"),
-                Double.valueOf(data.getStringExtra("price")),
-                data.getStringExtra("date"),
-                data.getStringExtra("id")));
-        customAdapterExpList.setItems(expenseDB.fnGetAllExpenses());
-        customAdapterExpList.notifyDataSetChanged();
+        if(resultCode==RESULT_OK) {
+            expenseDB.fnEditExpense(new ExpensesDBModel(
+                    data.getStringExtra("name"),
+                    Double.valueOf(data.getStringExtra("price")),
+                    data.getStringExtra("date"),
+                    data.getStringExtra("time"),
+                    data.getStringExtra("id")));
+            customAdapterExpList.setItems(expenseDB.fnGetAllExpenses());
+            customAdapterExpList.notifyDataSetChanged();
+        }
     }
 }

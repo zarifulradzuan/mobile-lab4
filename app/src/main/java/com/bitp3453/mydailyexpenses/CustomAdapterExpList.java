@@ -1,21 +1,16 @@
-package sqliteexpense;
+package com.bitp3453.mydailyexpenses;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bitp3453.mydailyexpenses.R;
 
 import java.util.List;
 
 import model.ExpensesDBModel;
 
-import static android.content.ContentValues.TAG;
 import static java.sql.Types.NULL;
 
 /**
@@ -49,7 +44,6 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_expenses_recycler,parent, false);
-        //RecyclerView.ViewHolder holder = new ViewHolder();
         return new ViewHolder(view);
     }
     @Override
@@ -61,6 +55,7 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
             price = expensesDBModel.getStrExpPrice();
         holder.txtVwExpPrice.setText(String.format("%.2f", price));
         holder.txtVwExpDate.setText(expensesDBModel.getStrExpDate());
+        holder.txtVwExpTime.setText(expensesDBModel.getStrExpTime());
     }
 
     @Override
@@ -69,7 +64,7 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        TextView txtVwExpName, txtVwExpPrice, txtVwExpDate;
+        TextView txtVwExpName, txtVwExpPrice, txtVwExpDate, txtVwExpTime;
 
         public ViewHolder(View itemView){
             super(itemView);
@@ -77,6 +72,7 @@ public class CustomAdapterExpList extends RecyclerView.Adapter<CustomAdapterExpL
             txtVwExpName = (TextView) itemView.findViewById(R.id.txtVwExpName);
             txtVwExpDate = (TextView) itemView.findViewById(R.id.txtVwExpDate);
             txtVwExpPrice= (TextView) itemView.findViewById(R.id.txtVwExpPrice);
+            txtVwExpTime= (TextView) itemView.findViewById(R.id.txtVwExpTime);
         }
 
         @Override
