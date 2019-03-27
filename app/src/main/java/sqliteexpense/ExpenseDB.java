@@ -55,9 +55,21 @@ public class ExpenseDB extends SQLiteOpenHelper {
         return retResult;
     }
 
-    public ExpensesDBModel fnGetExpenses(int intExpId){
+    public float fnEditExpense(ExpensesDBModel meExpense){
+        float retResult = 0;
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(colExpName, meExpense.getStrExpName());
+        values.put(colExpDate, meExpense.getStrExpDate());
+        values.put(colExpPrice, meExpense.getStrExpPrice());
 
-        String strSelQry = "Select * from" + tblNameExpense + " where "+ colExpId +" = " + intExpId;
+        retResult = db.update(tblNameExpense, values, colExpId+" = ?",new String[]{meExpense.getStrExpId()});
+        return retResult;
+    }
+
+    public ExpensesDBModel fnGetExpenses(String intExpId){
+
+        String strSelQry = "Select * from " + tblNameExpense + " where "+ colExpId +" = " + intExpId;
         Cursor cursor = this.getReadableDatabase().rawQuery(strSelQry,null);
         if(cursor!=null){
             cursor.moveToFirst();

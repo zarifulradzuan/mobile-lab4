@@ -52,7 +52,7 @@ public class ExpensesMainActivity extends AppCompatActivity {
             return true;
         }
         if(idMenu == R.id.expAll){
-            intent = new Intent(this, AcitivityExpList.class);
+            intent = new Intent(this, ActivityExpList.class);
         }
 
         startActivity(intent);
