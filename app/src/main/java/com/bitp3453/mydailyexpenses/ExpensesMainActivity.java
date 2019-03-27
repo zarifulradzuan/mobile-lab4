@@ -52,13 +52,17 @@ public class ExpensesMainActivity extends AppCompatActivity {
                     editExpDate.setText(jsonObject.getString("currDate"));
                     editExpTime.setText(jsonObject.getString("currTime"));
                 } catch (JSONException e) {
-                    Toast.makeText(getApplicationContext(),"error reading json", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"Error reading json", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("ErrorListener",error.getMessage());
+                try {
+                    Log.e("ErrorListener", error.getMessage());
+                } catch (NullPointerException e){
+                    Toast.makeText(getApplicationContext(),"Cannot connect to server", Toast.LENGTH_SHORT).show();
+                }
             }
         })
         {
