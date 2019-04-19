@@ -1,13 +1,14 @@
 package com.bitp3453.mydailyexpenses;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -21,8 +22,11 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import model.ExpensesDBModel;
 import sqliteexpense.ExpenseDB;
@@ -32,12 +36,14 @@ public class ExpensesMainActivity extends AppCompatActivity {
     EditText editExpName;
     EditText editExpDate;
     EditText editExpTime;
-    String url = "http://192.168.43.72/webServiceJSON/globalWebService.php";
+    ProgressBar progressBar;
+    String url;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expenses_main);
-
+        url = getString(R.string.url);
+        progressBar = findViewById(R.id.progressBar);
         editExpName = (EditText) findViewById(R.id.insertExpName);
         editExpDate = (EditText) findViewById(R.id.insertExpDate);
         editExpPrice = (EditText) findViewById(R.id.insertExpPrice);
@@ -61,6 +67,12 @@ public class ExpensesMainActivity extends AppCompatActivity {
                 try {
                     Log.e("ErrorListener", error.getMessage());
                 } catch (NullPointerException e){
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy");
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                    dateFormat.setTimeZone(TimeZone.getDefault());
+                    timeFormat.setTimeZone(TimeZone.getDefault());
+                    editExpTime.setText(timeFormat.format(new Date()));
+                    editExpDate.setText(dateFormat.format(new Date()));
                     Toast.makeText(getApplicationContext(),"Cannot connect to server", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -76,15 +88,47 @@ public class ExpensesMainActivity extends AppCompatActivity {
         requestQueue.add(stringRequest);
     }
 
-    public void fnSave (View vw){
-        ExpensesDBModel expensesDBModel = new ExpensesDBModel(
+    public void fnSave (final View vw){
+        progressBar.setVisibility(View.VISIBLE);
+        vw.setClickable(false);
+        final ExpensesDBModel expensesDBModel = new ExpensesDBModel(
                 editExpName.getText().toString(),
                 Double.valueOf(String.format("%.2f",Double.valueOf(editExpPrice.getText().toString()))),
                 editExpDate.getText().toString(),
                 editExpTime.getText().toString());
         ExpenseDB expenseDB = new ExpenseDB(getApplicationContext());
         expenseDB.fnInsertExpense(expensesDBModel);
-        Toast.makeText(getApplicationContext(), "Expenses Saved."+editExpTime.getText().toString(), Toast.LENGTH_SHORT).show();
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        vw.setClickable(true);
+                        System.out.println(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        vw.setClickable(true);
+                        Toast.makeText(getApplicationContext(),"Unable to make connection to web service", Toast.LENGTH_SHORT).show();
+                    }
+                }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("selectFn","fnAddExpense");
+                params.put("varMobileDate",expensesDBModel.getStrExpDate());
+                params.put("varExpName", expensesDBModel.getStrExpName());
+                params.put("varExpPrice", expensesDBModel.getStrExpPrice()+"");
+                params.put("varMobileTime", expensesDBModel.getStrExpTime());
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+        Toast.makeText(this, "Expense saved.",Toast.LENGTH_SHORT).show();
     }
 
     @Override

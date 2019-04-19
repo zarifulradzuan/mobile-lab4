@@ -7,8 +7,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import model.ExpensesDBModel;
 
@@ -24,14 +34,13 @@ public class ExpenseDB extends SQLiteOpenHelper {
     public static final String colExpDate = "expenses_date";
     public static final String colExpTime = "expenses_time";
     public static final String colExpId = "expenses_id";
-
     public static final String strCrtTblExpenses = "CREATE TABLE "+ tblNameExpense +
             " ("+ colExpId + " INTEGER PRIMARY KEY, "+ colExpName +" TEXT, " +
             colExpPrice + " REAL, "+ colExpTime +" TIME, " + colExpDate + " DATE)";
     public static final String strDropTblExpenses = "DROP TABLE IF EXISTS " + tblNameExpense;
 
     public ExpenseDB(Context context){
-        super(context, dbName, null, 1);
+        super(context, dbName, null, 3);
     }
 
     @Override
@@ -44,7 +53,7 @@ public class ExpenseDB extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public float fnInsertExpense(ExpensesDBModel meExpense){
+    public float fnInsertExpense(final ExpensesDBModel meExpense){
         float retResult = 0;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -57,7 +66,7 @@ public class ExpenseDB extends SQLiteOpenHelper {
         return retResult;
     }
 
-    public float fnEditExpense(ExpensesDBModel meExpense){
+    public float fnEditExpense(final ExpensesDBModel meExpense){
         float retResult = 0;
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -65,7 +74,6 @@ public class ExpenseDB extends SQLiteOpenHelper {
         values.put(colExpDate, meExpense.getStrExpDate());
         values.put(colExpPrice, meExpense.getStrExpPrice());
         values.put(colExpTime, meExpense.getStrExpTime());
-
         retResult = db.update(tblNameExpense, values, colExpId+" = ?",new String[]{meExpense.getStrExpId()});
         return retResult;
     }

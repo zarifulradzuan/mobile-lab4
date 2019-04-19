@@ -43,6 +43,10 @@ public class ActivityExpEdit extends AppCompatActivity {
 
     public void editExp(View vw) {
         Intent intent = new Intent();
+        ExpensesDBModel expensesDBModel = new ExpensesDBModel(name.getText().toString(),
+                                                Double.valueOf(price.getText().toString()),
+                                                date.getText().toString(), time.getText().toString(), expId);
+        //intent.put;
         intent.putExtra("id",expId);
         intent.putExtra("date",date.getText().toString());
         intent.putExtra("price",price.getText().toString());

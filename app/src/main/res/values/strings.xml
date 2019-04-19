@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MyDailyExpenses</string>
+    <string name="url">http://192.168.43.72/webServiceJSON/globalWebService.php</string>
 </resources>

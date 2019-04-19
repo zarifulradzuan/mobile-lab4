@@ -8,10 +8,26 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import model.ExpensesDBModel;
 import sqliteexpense.ExpenseDB;
+
+import static sqliteexpense.ExpenseDB.colExpDate;
+import static sqliteexpense.ExpenseDB.colExpId;
+import static sqliteexpense.ExpenseDB.colExpName;
+import static sqliteexpense.ExpenseDB.colExpPrice;
+import static sqliteexpense.ExpenseDB.colExpTime;
 
 public class ActivityExpList extends AppCompatActivity {
     RecyclerView recyclerViewExpList;
@@ -37,6 +53,7 @@ public class ActivityExpList extends AppCompatActivity {
         totalExpensesVw.setText("Total Expense: RM "+String.format("%.2f",totalExpenses));
 
         customAdapterExpList = new CustomAdapterExpList(expenseDB.fnGetAllExpenses());
+
         customAdapterExpList.setOnItemClickListener(new CustomAdapterExpList.ClickListener() {
             @Override
             public void onItemClick(int position, View v) {
@@ -55,14 +72,42 @@ public class ActivityExpList extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode==RESULT_OK) {
-            expenseDB.fnEditExpense(new ExpensesDBModel(
-                    data.getStringExtra("name"),
-                    Double.valueOf(data.getStringExtra("price")),
-                    data.getStringExtra("date"),
-                    data.getStringExtra("time"),
-                    data.getStringExtra("id")));
+            final ExpensesDBModel editedExpense =new  ExpensesDBModel(
+                                                data.getStringExtra("name"),
+                                                Double.valueOf(data.getStringExtra("price")),
+                                                data.getStringExtra("date"),
+                                                data.getStringExtra("time"),
+                                                data.getStringExtra("id"));
+            expenseDB.fnEditExpense(editedExpense);
             customAdapterExpList.setItems(expenseDB.fnGetAllExpenses());
             customAdapterExpList.notifyDataSetChanged();
+            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, getString(R.string.url),
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            System.out.println(response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    }){
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("selectFn","fnEditExpense");
+                    params.put("varMobileDate",editedExpense.getStrExpDate());
+                    params.put("varExpId", editedExpense.getStrExpId());
+                    params.put("varExpName", editedExpense.getStrExpName());
+                    params.put("varExpPrice", editedExpense.getStrExpPrice()+"");
+                    params.put("varMobileTime", editedExpense.getStrExpTime());
+                    return params;
+                }
+            };
+            requestQueue.add(stringRequest);
         }
     }
 }

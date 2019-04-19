@@ -1,10 +1,12 @@
 package model;
 
+import java.io.Serializable;
+
 /**
  * Created by user on 3/20/2019.
  */
 
-public class ExpensesDBModel {
+public class ExpensesDBModel implements Serializable {
     private String expId;
     private String expName;
     private Double expPrice;
